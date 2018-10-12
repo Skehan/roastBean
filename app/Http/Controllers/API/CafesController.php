@@ -1,50 +1,61 @@
 <?php
 
-use Illuminate\Http\Request;
+namespace App\Http\Controllers\API;
 
-Route::group(['prefix' => 'v1', 'middleware' => 'auth:api'], function(){
-  Route::get('/user', function( Request $request ){
-    return $request->user();
-  });
+use App\Http\Controllers\Controller;
+use Request;
+use App\Models\Cafe;
 
+class CafesController extends Controller
+{
   /*
   |-------------------------------------------------------------------------------
   | Get All Cafes
   |-------------------------------------------------------------------------------
   | URL:            /api/v1/cafes
-  | Controller:     API\CafesController@getCafes
   | Method:         GET
   | Description:    Gets all of the cafes in the application
   */
-  Route::get('/cafes', 'API\CafesController@getCafes');
+  public function getCafes(){
+    $cafes = Cafe::all();
+
+    return response()->json( $cafes );
+  }
 
   /*
   |-------------------------------------------------------------------------------
   | Get An Individual Cafe
   |-------------------------------------------------------------------------------
   | URL:            /api/v1/cafes/{id}
-  | Controller:     API\CafesController@getCafe
   | Method:         GET
   | Description:    Gets an individual cafe
+  | Parameters:
+  |   $id   -> ID of the cafe we are retrieving
   */
-  Route::get('/cafes/{id}', 'API\CafesController@getCafe');
+  public function getCafe( $id ){
+    $cafe = Cafe::where('id', '=', $id)->first();
+    return response()->json( $cafe );
+  }
 
   /*
   |-------------------------------------------------------------------------------
   | Adds a New Cafe
   |-------------------------------------------------------------------------------
   | URL:            /api/v1/cafes
-  | Controller:     API\CafesController@postNewCafe
   | Method:         POST
   | Description:    Adds a new cafe to the application
   */
-  Route::post('/cafes', 'API\CafesController@postNewCafe');
-});
+  public function postNewCafe(){
+    $cafe = new Cafe();
 
+    $cafe->name     = Request::get('name');
+    $cafe->address  = Request::get('address');
+    $cafe->city     = Request::get('city');
+    $cafe->state    = Request::get('state');
+    $cafe->zip      = Request::get('zip');
 
+    $cafe->save();
 
-
-
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+    return response()->json($cafe, 201);
+  }
+}
